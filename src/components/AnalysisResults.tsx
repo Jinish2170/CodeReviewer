@@ -1,22 +1,22 @@
-import React from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Chip,
-  LinearProgress,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  List,
-  ListItem,
-  ListItemText,
-} from '@mui/material';
 import {
   ExpandMore,
   School,
 } from '@mui/icons-material';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+} from '@mui/material';
+import React from 'react';
 import { CodeReviewResponse } from '../types';
 
 interface AnalysisResultsProps {

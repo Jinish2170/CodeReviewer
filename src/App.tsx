@@ -1,9 +1,8 @@
-import React from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, AppBar, Toolbar, Typography, Box } from '@mui/material';
-import CodeReviewInterface from './components/CodeReviewInterface';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import './App.css';
+import CodeReviewInterface from './components/CodeReviewInterface';
 
 const theme = createTheme({
   palette: {

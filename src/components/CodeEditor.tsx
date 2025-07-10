@@ -1,5 +1,5 @@
+import { Box, TextField } from '@mui/material';
 import React from 'react';
-import { TextField, Box } from '@mui/material';
 
 interface CodeEditorProps {
   value: string;
