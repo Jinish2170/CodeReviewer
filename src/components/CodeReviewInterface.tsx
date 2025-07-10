@@ -27,7 +27,6 @@ import {
   Chip,
   CircularProgress,
   FormControl,
-  Grid,
   InputLabel,
   LinearProgress,
   List,
@@ -244,28 +243,54 @@ const CodeReviewInterface: React.FC = () => {
   const renderStep0 = () => (
     <Box>
       {/* Hero Section */}
-      <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
-        <CardContent sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold' }}>
+      <Card sx={{ 
+        mb: 3, 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+        color: 'white',
+        borderRadius: 3,
+        overflow: 'hidden',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(10px)',
+        }
+      }}>
+        <CardContent sx={{ textAlign: 'center', py: 5, position: 'relative', zIndex: 1 }}>
+          <Typography variant="h3" gutterBottom sx={{ fontWeight: 'bold', mb: 1 }}>
             🤖 AI Code Review Assistant
           </Typography>
-          <Typography variant="h6" sx={{ opacity: 0.9, mb: 2 }}>
+          <Typography variant="h6" sx={{ opacity: 0.95, mb: 3, fontWeight: 500 }}>
             Get instant, intelligent feedback on your code. Learn best practices, fix bugs, and improve performance.
           </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.8 }}>
+          <Typography variant="body1" sx={{ opacity: 0.85, maxWidth: 600, mx: 'auto' }}>
             Paste your code below or try one of our examples to see AI-powered suggestions in action!
           </Typography>
         </CardContent>
       </Card>
 
       {/* Quick Examples */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+      <Card sx={{ 
+        mb: 3,
+        borderRadius: 3,
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }
+      }}>
+        <CardContent sx={{ p: 3 }}>
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', fontWeight: 600 }}>
             <Lightbulb sx={{ mr: 1, color: 'orange' }} />
             Try These Problematic Code Examples
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             Click any example to see how our AI finds and explains code issues:
           </Typography>
           <Box display="flex" gap={2} flexWrap="wrap">
@@ -274,7 +299,18 @@ const CodeReviewInterface: React.FC = () => {
                 key={lang}
                 variant="outlined"
                 onClick={() => loadSampleCode(lang)}
-                sx={{ borderRadius: 2, textTransform: 'none' }}
+                sx={{ 
+                  borderRadius: 2, 
+                  textTransform: 'none',
+                  px: 3,
+                  py: 1,
+                  fontWeight: 500,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  }
+                }}
               >
                 {sample.title}
               </Button>
@@ -284,11 +320,20 @@ const CodeReviewInterface: React.FC = () => {
       </Card>
 
       {/* Code Input */}
-      <Card>
-        <CardContent>
-          <Box display="flex" alignItems="center" mb={2}>
-            <Code sx={{ mr: 1 }} />
-            <Typography variant="h6">Your Code</Typography>
+      <Card sx={{ 
+        borderRadius: 3,
+        border: '1px solid',
+        borderColor: 'divider',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          borderColor: 'primary.main',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        }
+      }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box display="flex" alignItems="center" mb={3}>
+            <Code sx={{ mr: 1, color: 'primary.main' }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>Your Code</Typography>
           </Box>
 
           <Box mb={2}>
@@ -346,7 +391,24 @@ const CodeReviewInterface: React.FC = () => {
             disabled={analysisState.isLoading}
             startIcon={analysisState.isLoading ? <CircularProgress size={20} /> : <PlayArrow />}
             fullWidth
-            sx={{ py: 1.5, fontSize: '1.1rem', fontWeight: 'bold' }}
+            sx={{ 
+              py: 2, 
+              fontSize: '1.1rem', 
+              fontWeight: 'bold',
+              borderRadius: 2,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
+                boxShadow: '0 6px 24px rgba(102, 126, 234, 0.4)',
+                transform: 'translateY(-1px)',
+              },
+              '&:disabled': {
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                opacity: 0.7,
+              }
+            }}
           >
             {analysisState.isLoading ? 'AI is analyzing your code...' : '🚀 Analyze My Code!'}
           </Button>
@@ -413,24 +475,24 @@ const CodeReviewInterface: React.FC = () => {
             </Typography>
             
             {/* Metrics */}
-            <Grid container spacing={2}>
-              <Grid item xs={6} md={3}>
+            <Box display="flex" flexWrap="wrap" gap={2}>
+              <Box textAlign="center" flex={1} minWidth="120px">
                 <Typography variant="body2" color="text.secondary">Lines of Code</Typography>
                 <Typography variant="h6">{metrics.lines_of_code}</Typography>
-              </Grid>
-              <Grid item xs={6} md={3}>
+              </Box>
+              <Box textAlign="center" flex={1} minWidth="120px">
                 <Typography variant="body2" color="text.secondary">Complexity</Typography>
                 <Typography variant="h6">{metrics.complexity_score.toFixed(1)}</Typography>
-              </Grid>
-              <Grid item xs={6} md={3}>
+              </Box>
+              <Box textAlign="center" flex={1} minWidth="120px">
                 <Typography variant="body2" color="text.secondary">Maintainability</Typography>
                 <Typography variant="h6">{metrics.maintainability_index.toFixed(1)}</Typography>
-              </Grid>
-              <Grid item xs={6} md={3}>
+              </Box>
+              <Box textAlign="center" flex={1} minWidth="120px">
                 <Typography variant="body2" color="text.secondary">Issues Found</Typography>
                 <Typography variant="h6">{suggestions.length}</Typography>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
           </CardContent>
         </Card>
 

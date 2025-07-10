@@ -1,25 +1,55 @@
-import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material';
-import CssBaseline from '@mui/material/CssBaseline';
+import React from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import './App.css';
+import CssBaseline from '@mui/material/CssBaseline';
+import { AppBar, Box, Container, Toolbar, Typography } from '@mui/material';
 import CodeReviewInterface from './components/CodeReviewInterface';
+import './App.css';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2196f3',
+      main: '#667eea',
     },
     secondary: {
-      main: '#f50057',
+      main: '#764ba2',
     },
     background: {
-      default: '#f5f5f5',
+      default: '#f8fafc',
     },
   },
   typography: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h2: {
+      fontWeight: 700,
+    },
+    h3: {
+      fontWeight: 700,
+    },
     h4: {
       fontWeight: 600,
+    },
+    h5: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 600,
+        },
+      },
     },
   },
 });
