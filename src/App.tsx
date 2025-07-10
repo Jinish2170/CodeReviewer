@@ -30,10 +30,13 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar position="static" sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
           <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              🤖 AI Code Review Assistant
+            <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+              🔍 AI Code Detective - Find Bugs & Security Issues
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+              Learn. Fix. Improve.
             </Typography>
           </Toolbar>
         </AppBar>
