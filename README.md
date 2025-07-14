@@ -1,46 +1,92 @@
-# Getting Started with Create React App
+# CodeReviewer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**CodeReviewer** is an AI-powered code review platform that analyzes source code in multiple programming languages, providing instant, actionable feedback on code quality, bugs, security vulnerabilities, maintainability, and best practices. Its interactive interface helps developers learn, improve, and write robust code with the support of AI.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- **Multi-language Support**: Review Python, JavaScript, TypeScript, Java, C++, Go, and more.
+- **AI Code Analysis**: Detects bugs, security issues, performance bottlenecks, code smells, and best practice violations.
+- **Instant Feedback**: Get real-time suggestions, explanations, and fixes for your code.
+- **Rich Metrics**: Visualize lines of code, complexity, maintainability, and issue counts.
+- **Educational Insights**: Learn with clear explanations, learning points, and recommended resources.
+- **User-friendly UI**: Paste your code or select from built-in buggy examples to see the AI in action.
+- **Custom Review Focus**: Ask the AI to focus on specific concerns (e.g., security, performance).
+- **Step-by-Step Workflow**: Guided process from code input, through AI analysis, to learning and next steps.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+---
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## How It Works
 
-### `npm test`
+1. **Enter or Paste Code**: Choose your language and input your code snippet.
+2. **(Optional) Set Review Context**: Specify what you'd like the AI to focus on—such as performance, security, or code style.
+3. **Analyze**: Click "Analyze My Code!" to let the AI review your code.
+4. **Review Results**:
+    - **Overall Score**: See a quality score out of 10, with a summary of key findings.
+    - **Metrics**: View statistics like lines of code, complexity, maintainability, and number of issues.
+    - **Issue Breakdown**: Explore AI-generated suggestions, each including:
+        - Issue description and severity
+        - Why it matters
+        - How to fix it
+        - Example code and learning resources (when available)
+    - **Learning Points**: Key takeaways to improve your coding skills.
+    - **Next Steps**: Actionable recommendations to enhance your code further.
+5. **Try Examples or Analyze Again**: Use built-in buggy code samples to see how the AI works, or start over with new code.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Example Use Cases
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Learn to Spot Bugs**: Use sample problems to understand common errors and how to fix them.
+- **Improve Security**: Catch SQL injection, unsafe eval usage, and other vulnerabilities.
+- **Optimize Performance**: Identify inefficient code and get suggestions for optimization.
+- **Enforce Best Practices**: Receive tips to write cleaner, more maintainable code.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Technologies Used
 
-### `npm run eject`
+- **Frontend**: React, Material UI, TypeScript
+- **AI Analysis**: (Presumed) Backend API for AI-powered code review (API integration in `CodeReviewService`)
+- **Component Highlights**:
+    - `CodeReviewInterface.tsx`: Main interactive UI for code review
+    - `CodeEditor`: Embedded code editor for multi-language support
+    - `types/index.ts`: Strongly-typed interfaces for suggestions, metrics, and results
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+---
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Getting Started
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/Jinish2170/CodeReviewer.git
+    cd CodeReviewer
+    ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+2. **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-## Learn More
+3. **Run the app**:
+    ```bash
+    npm start
+    ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+4. **Open in browser**: Visit `http://localhost:3000` (or the port shown in your terminal).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+## Author
+
+Created by [Jinish2170](https://github.com/Jinish2170)
+
+---
