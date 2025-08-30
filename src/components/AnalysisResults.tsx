@@ -153,6 +153,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ result, onExportRepor
             <Box>
               {onExportReport && (
                 <Button
+                  id="export-button"
                   variant="outlined"
                   onClick={onExportReport}
                   startIcon={<Download />}
