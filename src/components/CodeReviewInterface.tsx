@@ -1,24 +1,16 @@
 import {
-  Assessment,
   AutoFixHigh,
   BugReport,
-  CheckCircle,
+  CloudUpload,
   Code,
-  Error as ErrorIcon,
-  ExpandMore,
-  Info,
   Lightbulb,
   PlayArrow,
   Refresh,
-  School,
   Security,
   Speed,
-  Warning
+  Tab as TabIcon
 } from '@mui/icons-material';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Alert,
   Box,
   Button,
@@ -28,23 +20,24 @@ import {
   CircularProgress,
   FormControl,
   InputLabel,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  Menu,
   MenuItem,
   Select,
   Step,
   StepLabel,
   Stepper,
+  Tab,
+  Tabs,
   TextField,
   Typography
 } from '@mui/material';
 import React, { useState } from 'react';
-import CodeReviewService from '../services/api';
-import { AnalysisState, CodeReviewRequest } from '../types';
+import AnalysisResults from './AnalysisResults';
 import CodeEditor from './CodeEditor';
+import FileUpload from './FileUpload';
+import CodeReviewService from '../services/api';
+import { ReportExporter } from '../services/reportExporter';
+import { AnalysisState, CodeReviewRequest } from '../types';
 
 const SAMPLE_CODES = {
   python: {
@@ -167,15 +160,23 @@ const CodeReviewInterface: React.FC = () => {
     error: null,
   });
   const [activeStep, setActiveStep] = useState(0);
+  const [inputMode, setInputMode] = useState<'editor' | 'files'>('editor');
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<null | HTMLElement>(null);
+  const [selectedFileIndex, setSelectedFileIndex] = useState(0);
 
   const steps = ['Choose Code', 'AI Analysis', 'Learn & Improve'];
 
   const handleAnalyzeCode = async () => {
-    if (!code.trim()) {
+    const codeToAnalyze = uploadedFiles.length > 0 
+      ? uploadedFiles[selectedFileIndex]?.content || code 
+      : code;
+      
+    if (!codeToAnalyze.trim()) {
       setAnalysisState({
         isLoading: false,
         result: null,
-        error: 'Please enter some code to analyze, or try one of our examples!',
+        error: 'Please enter some code to analyze, or upload files!',
       });
       return;
     }
@@ -185,8 +186,8 @@ const CodeReviewInterface: React.FC = () => {
 
     try {
       const request: CodeReviewRequest = {
-        code: code.trim(),
-        language,
+        code: codeToAnalyze.trim(),
+        language: uploadedFiles.length > 0 ? uploadedFiles[selectedFileIndex]?.language || language : language,
         context: context.trim() || undefined,
       };
 
@@ -203,6 +204,37 @@ const CodeReviewInterface: React.FC = () => {
     }
   };
 
+  const handleExportReport = async (format: 'html' | 'json' | 'markdown') => {
+    if (!analysisState.result) return;
+    
+    try {
+      switch (format) {
+        case 'html':
+          await ReportExporter.exportToPDF(analysisState.result);
+          break;
+        case 'json':
+          await ReportExporter.exportToJSON(analysisState.result);
+          break;
+        case 'markdown':
+          await ReportExporter.exportToMarkdown(analysisState.result);
+          break;
+      }
+      setExportMenuAnchor(null);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const handleFilesChange = (files: any[]) => {
+    setUploadedFiles(files);
+    if (files.length > 0) {
+      setInputMode('files');
+      setSelectedFileIndex(0);
+    } else {
+      setInputMode('editor');
+    }
+  };
+
   const loadSampleCode = (lang: string) => {
     const sample = SAMPLE_CODES[lang as keyof typeof SAMPLE_CODES];
     if (sample) {
@@ -211,32 +243,8 @@ const CodeReviewInterface: React.FC = () => {
       setContext(sample.description);
       setActiveStep(0);
       setAnalysisState({ isLoading: false, result: null, error: null });
-    }
-  };
-
-  const getSeverityIcon = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-      case 'error':
-        return <ErrorIcon color="error" />;
-      case 'warning':
-        return <Warning color="warning" />;
-      case 'info':
-      default:
-        return <Info color="info" />;
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-      case 'error':
-        return 'error';
-      case 'warning':
-        return 'warning';
-      case 'info':
-      default:
-        return 'info';
+      setInputMode('editor');
+      setUploadedFiles([]);
     }
   };
 
@@ -336,40 +344,108 @@ const CodeReviewInterface: React.FC = () => {
             <Typography variant="h6" sx={{ fontWeight: 600 }}>Your Code</Typography>
           </Box>
 
-          <Box mb={2}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Programming Language</InputLabel>
-              <Select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                label="Programming Language"
-              >
-                {LANGUAGE_OPTIONS.map((lang) => (
-                  <MenuItem key={lang.value} value={lang.value}>
-                    <Box display="flex" alignItems="center">
-                      <Box 
-                        width={12} 
-                        height={12} 
-                        bgcolor={lang.color} 
-                        borderRadius="50%" 
-                        mr={1} 
-                      />
-                      {lang.label}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-
-          <Box mb={2}>
-            <CodeEditor
-              value={code}
-              onChange={setCode}
-              language={language}
-              placeholder={`Enter your ${LANGUAGE_OPTIONS.find(l => l.value === language)?.label} code here...`}
+          {/* Input Mode Tabs */}
+          <Tabs 
+            value={inputMode} 
+            onChange={(_, newValue) => setInputMode(newValue)}
+            sx={{ mb: 2 }}
+          >
+            <Tab 
+              icon={<Code />} 
+              label="Code Editor" 
+              value="editor"
+              sx={{ minHeight: 48 }}
             />
-          </Box>
+            <Tab 
+              icon={<CloudUpload />} 
+              label="Upload Files" 
+              value="files"
+              sx={{ minHeight: 48 }}
+            />
+          </Tabs>
+
+          {inputMode === 'editor' ? (
+            <Box>
+              <Box mb={2}>
+                <FormControl fullWidth variant="outlined" size="small">
+                  <InputLabel>Programming Language</InputLabel>
+                  <Select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    label="Programming Language"
+                  >
+                    {LANGUAGE_OPTIONS.map((lang) => (
+                      <MenuItem key={lang.value} value={lang.value}>
+                        <Box display="flex" alignItems="center">
+                          <Box 
+                            width={12} 
+                            height={12} 
+                            bgcolor={lang.color} 
+                            borderRadius="50%" 
+                            mr={1} 
+                          />
+                          {lang.label}
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
+
+              <Box mb={2}>
+                <CodeEditor
+                  value={code}
+                  onChange={setCode}
+                  language={language}
+                  placeholder={`Enter your ${LANGUAGE_OPTIONS.find(l => l.value === language)?.label} code here...`}
+                  height="400px"
+                />
+              </Box>
+            </Box>
+          ) : (
+            <Box>
+              <FileUpload onFilesChange={handleFilesChange} />
+              
+              {uploadedFiles.length > 0 && (
+                <Box mt={2}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Select file to analyze:
+                  </Typography>
+                  <Tabs
+                    value={selectedFileIndex}
+                    onChange={(_, newValue) => setSelectedFileIndex(newValue)}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    sx={{ borderBottom: 1, borderColor: 'divider' }}
+                  >
+                    {uploadedFiles.map((file, index) => (
+                      <Tab 
+                        key={index}
+                        label={
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <TabIcon fontSize="small" />
+                            {file.file.name}
+                          </Box>
+                        }
+                      />
+                    ))}
+                  </Tabs>
+                  
+                  {uploadedFiles[selectedFileIndex] && (
+                    <Box mt={2}>
+                      <CodeEditor
+                        value={uploadedFiles[selectedFileIndex].content}
+                        onChange={() => {}} // Read-only for uploaded files
+                        language={uploadedFiles[selectedFileIndex].language}
+                        height="300px"
+                        readOnly
+                      />
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
 
           <Box mb={2}>
             <TextField
@@ -446,184 +522,58 @@ const CodeReviewInterface: React.FC = () => {
   const renderStep2 = () => {
     if (!analysisState.result) return null;
 
-    const { suggestions, metrics, overall_score, summary, learning_points, next_steps } = analysisState.result;
-
     return (
       <Box>
-        {/* Overall Score */}
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-              <Assessment sx={{ mr: 1 }} />
-              Code Quality Report
-            </Typography>
-            <Box display="flex" alignItems="center" mb={2}>
-              <Box width="100%" mr={2}>
-                <LinearProgress
-                  variant="determinate"
-                  value={overall_score * 10}
-                  sx={{ height: 10, borderRadius: 5 }}
-                  color={overall_score >= 8 ? 'success' : overall_score >= 6 ? 'warning' : 'error'}
-                />
-              </Box>
-              <Typography variant="h4" color="text.secondary" sx={{ fontWeight: 'bold' }}>
-                {overall_score.toFixed(1)}/10
-              </Typography>
-            </Box>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              {summary}
-            </Typography>
-            
-            {/* Metrics */}
-            <Box display="flex" flexWrap="wrap" gap={2}>
-              <Box textAlign="center" flex={1} minWidth="120px">
-                <Typography variant="body2" color="text.secondary">Lines of Code</Typography>
-                <Typography variant="h6">{metrics.lines_of_code}</Typography>
-              </Box>
-              <Box textAlign="center" flex={1} minWidth="120px">
-                <Typography variant="body2" color="text.secondary">Complexity</Typography>
-                <Typography variant="h6">{metrics.complexity_score.toFixed(1)}</Typography>
-              </Box>
-              <Box textAlign="center" flex={1} minWidth="120px">
-                <Typography variant="body2" color="text.secondary">Maintainability</Typography>
-                <Typography variant="h6">{metrics.maintainability_index.toFixed(1)}</Typography>
-              </Box>
-              <Box textAlign="center" flex={1} minWidth="120px">
-                <Typography variant="body2" color="text.secondary">Issues Found</Typography>
-                <Typography variant="h6">{suggestions.length}</Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+        <AnalysisResults 
+          result={analysisState.result} 
+          onExportReport={() => setExportMenuAnchor(document.getElementById('export-button'))}
+        />
+        
+        {/* Export Menu */}
+        <Menu
+          anchorEl={exportMenuAnchor}
+          open={Boolean(exportMenuAnchor)}
+          onClose={() => setExportMenuAnchor(null)}
+        >
+          <MenuItem onClick={() => handleExportReport('html')}>
+            Export as HTML
+          </MenuItem>
+          <MenuItem onClick={() => handleExportReport('markdown')}>
+            Export as Markdown
+          </MenuItem>
+          <MenuItem onClick={() => handleExportReport('json')}>
+            Export as JSON
+          </MenuItem>
+        </Menu>
 
-        {/* Issues and Suggestions */}
-        {suggestions.length > 0 && (
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                <BugReport sx={{ mr: 1, color: 'error.main' }} />
-                Issues Found ({suggestions.length})
-              </Typography>
-              {suggestions.map((suggestion, index) => (
-                <Accordion key={index} sx={{ mb: 1 }}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Box display="flex" alignItems="center" width="100%">
-                      <Box display="flex" alignItems="center" mr={2}>
-                        {getSeverityIcon(suggestion.severity)}
-                      </Box>
-                      <Box flexGrow={1}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                          {suggestion.title}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Line {suggestion.line_number} • {suggestion.type.replace('_', ' ')}
-                        </Typography>
-                      </Box>
-                      <Chip
-                        label={suggestion.severity}
-                        color={getSeverityColor(suggestion.severity) as any}
-                        size="small"
-                      />
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Box>
-                      <Typography variant="body2" paragraph>
-                        <strong>🔍 What's wrong:</strong> {suggestion.description}
-                      </Typography>
-                      <Typography variant="body2" paragraph>
-                        <strong>📚 Why this matters:</strong> {suggestion.explanation}
-                      </Typography>
-                      {suggestion.suggested_fix && (
-                        <Typography variant="body2" paragraph>
-                          <strong>🔧 How to fix:</strong> {suggestion.suggested_fix}
-                        </Typography>
-                      )}
-                      {suggestion.code_example && (
-                        <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 1, mt: 1 }}>
-                          <Typography variant="caption" color="text.secondary">
-                            💡 Better approach:
-                          </Typography>
-                          <pre style={{ margin: '8px 0 0 0', fontSize: '12px', overflow: 'auto' }}>
-                            {suggestion.code_example}
-                          </pre>
-                        </Box>
-                      )}
-                    </Box>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Learning Points */}
-        {learning_points.length > 0 && (
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                <School sx={{ mr: 1, color: 'info.main' }} />
-                Key Learning Points
-              </Typography>
-              <List>
-                {learning_points.map((point, index) => (
-                  <ListItem key={index}>
-                    <ListItemIcon>
-                      <Lightbulb color="warning" />
-                    </ListItemIcon>
-                    <ListItemText primary={point} />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Next Steps */}
-        {next_steps.length > 0 && (
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                <CheckCircle sx={{ mr: 1, color: 'success.main' }} />
-                Recommended Next Steps
-              </Typography>
-              <List>
-                {next_steps.map((step, index) => (
-                  <ListItem key={index}>
-                    <ListItemIcon>
-                      <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                        {index + 1}.
-                      </Typography>
-                    </ListItemIcon>
-                    <ListItemText primary={step} />
-                  </ListItem>
-                ))}
-              </List>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Start Over Button */}
-        <Card>
+        {/* Start Over Section */}
+        <Card sx={{ mt: 3 }}>
           <CardContent sx={{ textAlign: 'center' }}>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setActiveStep(0);
-                setAnalysisState({ isLoading: false, result: null, error: null });
-              }}
-              startIcon={<Refresh />}
-              sx={{ mr: 2 }}
-            >
-              Analyze Different Code
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => loadSampleCode(language)}
-              startIcon={<Lightbulb />}
-            >
-              Try Another Example
-            </Button>
+            <Typography variant="h6" gutterBottom>
+              🎉 Great job analyzing your code!
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Ready to review more code or try different examples?
+            </Typography>
+            <Box display="flex" gap={2} justifyContent="center" flexWrap="wrap">
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setActiveStep(0);
+                  setAnalysisState({ isLoading: false, result: null, error: null });
+                }}
+                startIcon={<Refresh />}
+              >
+                Analyze Different Code
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => loadSampleCode(language)}
+                startIcon={<Lightbulb />}
+              >
+                Try Another Example
+              </Button>
+            </Box>
           </CardContent>
         </Card>
       </Box>
